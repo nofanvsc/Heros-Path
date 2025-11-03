@@ -1,0 +1,3 @@
+repository "Hero-s Path/Hero-s Path@18968250913432@cloud"
+  path "/"
+    smartbranch "/main"
