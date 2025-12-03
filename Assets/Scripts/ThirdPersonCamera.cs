@@ -3,25 +3,49 @@ using UnityEngine;
 public class ThirdPersonCamera : MonoBehaviour
 {
     public Transform player;
-    public Vector3 offset = new Vector3(0, 2f, -4f);
-    public float sensitivity = 5f;
-    public float smoothSpeed = 10f;
 
-    private float yaw, pitch;
+    [Header("Camera Settings")]
+    public Vector3 offset = new Vector3(1.79f, 2.02f, -3.64f);
+    public float sensitivity = 1.7f;
+    public float smoothSpeed = 3000f;
+
+    [Header("Pitch Clamp")]
+    public float minPitch = -35f;
+    public float maxPitch = 65f;
+
+    private float yaw;
+    private float pitch;
+
+    void Start()
+    {
+        Vector3 rot = transform.eulerAngles;
+        yaw = rot.y;
+        pitch = rot.x;
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
 
     void LateUpdate()
     {
-        // Mouse movement to rotate the camera freely
-        yaw += Input.GetAxis("Mouse X") * sensitivity;
-        pitch -= Input.GetAxis("Mouse Y") * sensitivity;
-        pitch = Mathf.Clamp(pitch, -35f, 60f); // limit up/down angle
+        if (!player) return;
 
-        // Compute camera position and rotation
+        // ----- MOUSE LOOK -----
+        float mouseX = Input.GetAxis("Mouse X") * sensitivity;
+        float mouseY = Input.GetAxis("Mouse Y") * sensitivity;
+
+        yaw += mouseX;
+        pitch -= mouseY;
+        pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+
         Quaternion rotation = Quaternion.Euler(pitch, yaw, 0);
-        Vector3 desiredPosition = player.position + rotation * offset;
 
-        // Smooth follow
-        transform.position = Vector3.Lerp(transform.position, desiredPosition, Time.deltaTime * smoothSpeed);
-        transform.LookAt(player.position + Vector3.up * 1.5f);
+        // ----- CAMERA POSITION -----
+        Vector3 desiredPos = player.position + rotation * offset;
+
+        transform.position = Vector3.Lerp(transform.position, desiredPos, smoothSpeed * Time.deltaTime);
+
+        // ----- CAMERA ROTATION -----
+        transform.rotation = rotation;
     }
 }

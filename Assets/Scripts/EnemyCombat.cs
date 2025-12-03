@@ -1,0 +1,160 @@
+﻿using UnityEngine;
+using UnityEngine.UI;
+
+public class EnemyCombat : MonoBehaviour
+{
+    [Header("Health")]
+    public int maxHealth = 100;
+    public int currentHealth;
+    public Image healthFill;
+
+    [Header("Attack Settings")]
+    public int damage = 15;
+    public float attackRange = 2f;
+    public float attackCooldown = 1.5f;
+
+    [Header("References")]
+    public Animator animator;
+    public EnemyAStarAI ai;
+    public Transform attackPoint;        // SwordGoblin -> AttackPoint (child)
+    public float hitboxRadius = 0.6f;    // matches player style
+    public LayerMask playerLayer;
+
+    private Transform player;
+    private PlayerCombat playerCombat;
+
+    private float nextAttackTime = 0f;
+    private bool isAttacking = false;
+    private bool hitboxActive = false;
+
+    void Start()
+    {
+        currentHealth = maxHealth;
+        UpdateUI();
+
+        GameObject pgo = GameObject.FindWithTag("Player");
+        if (pgo != null)
+        {
+            player = pgo.transform;
+            playerCombat = player.GetComponent<PlayerCombat>();
+            if (playerCombat == null)
+                Debug.LogWarning("EnemyCombat: PlayerCombat not found on Player object.");
+        }
+        else
+        {
+            Debug.LogWarning("EnemyCombat: No GameObject with tag 'Player' found in scene.");
+        }
+
+        // safety: if ai or animator not assigned, try to get from this object
+        if (ai == null) ai = GetComponent<EnemyAStarAI>();
+        if (animator == null) animator = GetComponent<Animator>();
+    }
+
+    void Update()
+    {
+        TryAttack();
+    }
+
+    // ----------------------------------------------------------
+    // ATTACK ATTEMPT
+    // ----------------------------------------------------------
+    void TryAttack()
+    {
+        if (isAttacking) return;
+        if (player == null) return;
+
+        float dist = Vector3.Distance(transform.position, player.position);
+        if (dist <= attackRange && Time.time >= nextAttackTime)
+        {
+            nextAttackTime = Time.time + attackCooldown;
+
+            isAttacking = true;
+            if (ai != null) ai.canMove = false;
+
+            if (animator != null)
+            {
+                animator.SetBool("isAttacking", true);
+                animator.SetTrigger("AttackTrigger");
+            }
+        }
+    }
+
+    // ----------------------------------------------------------
+    // ANIMATION EVENT: EnableAttack (put this event at impact frame)
+    // ----------------------------------------------------------
+    public void EnableAttack()
+    {
+        hitboxActive = true;
+    }
+
+    // ----------------------------------------------------------
+    // ANIMATION EVENT: DisableAttack (put this event at end of attack)
+    // ----------------------------------------------------------
+    public void DisableAttack()
+    {
+        hitboxActive = false;
+        isAttacking = false;
+
+        if (animator != null) animator.SetBool("isAttacking", false);
+        if (ai != null) ai.canMove = true;
+    }
+
+    void FixedUpdate()
+    {
+        if (!hitboxActive) return;
+        if (attackPoint == null) return;
+
+        Collider[] hits = Physics.OverlapSphere(attackPoint.position, hitboxRadius, playerLayer);
+
+        foreach (var h in hits)
+        {
+            if (playerCombat != null)
+            {
+                playerCombat.TakeDamage(damage);
+            }
+            else
+            {
+                var pc = h.GetComponent<PlayerCombat>();
+                if (pc != null) pc.TakeDamage(damage);
+            }
+
+            // only apply once per attack
+            hitboxActive = false;
+            break;
+        }
+    }
+
+    // ----------------------------------------------------------
+    // DAMAGE + UI
+    // ----------------------------------------------------------
+    public void TakeDamage(int dmg)
+    {
+        currentHealth -= dmg;
+        if (currentHealth < 0) currentHealth = 0;
+        UpdateUI();
+        if (currentHealth <= 0) Die();
+    }
+
+    void UpdateUI()
+    {
+        if (healthFill != null)
+            healthFill.fillAmount = (float)currentHealth / maxHealth;
+    }
+
+    void Die()
+    {
+        Destroy(gameObject);
+    }
+
+    // ----------------------------------------------------------
+    // DEBUG DRAW (optional)
+    // ----------------------------------------------------------
+    void OnDrawGizmosSelected()
+    {
+        if (attackPoint)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(attackPoint.position, hitboxRadius);
+        }
+    }
+}
