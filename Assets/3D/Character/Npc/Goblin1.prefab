@@ -178,8 +178,6 @@ GameObject:
   - component: {fileID: 590694124501132381}
   - component: {fileID: 7231202182377463439}
   - component: {fileID: 2270953509400145294}
-  - component: {fileID: 8860105280876905528}
-  - component: {fileID: 6692798767302663051}
   m_Layer: 6
   m_Name: Goblin1
   m_TagString: Enemy
@@ -276,52 +274,6 @@ MonoBehaviour:
   obstacleMask:
     serializedVersion: 2
     m_Bits: 0
---- !u!114 &8860105280876905528
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 695290075901594293}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5f4014d0c6cdb8443a72269fcf204a32, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombat
-  maxHealth: 100
-  currentHealth: 0
-  healthFill: {fileID: 7598275648497648234}
-  damage: 15
-  attackRange: 2
-  attackCooldown: 1.5
-  animator: {fileID: 7231202182377463439}
-  ai: {fileID: 6692798767302663051}
-  attackPoint: {fileID: 3669724159888568331}
-  hitboxRadius: 0.6
-  playerLayer:
-    serializedVersion: 2
-    m_Bits: 128
---- !u!114 &6692798767302663051
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 695290075901594293}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a2fe144aa1e52bb47804c37beed5192f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAStarAI
-  player: {fileID: 0}
-  animator: {fileID: 7231202182377463439}
-  canMove: 1
-  aggroRadius: 50
-  moveSpeed: 3
-  pathUpdateRate: 0.2
-  viewAngle: 140
-  viewDistance: 50
-  drawFOV: 1
 --- !u!1 &818970225930051221
 GameObject:
   m_ObjectHideFlags: 0

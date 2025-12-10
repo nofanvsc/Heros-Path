@@ -5,11 +5,11 @@ public class EnemyAStarAI : MonoBehaviour
 {
     [Header("References")]
     public Transform player;
-    public Animator animator;       // optional - used for isJogging & speed
-    public bool canMove = true;     // can be toggled by combat during attack
+    public Animator animator;
+    public bool canMove = true;
 
     [Header("Aggro Settings")]
-    public float aggroRadius = 50f;
+    public float aggroRadius = 20f;
 
     [Header("Movement Settings")]
     public float moveSpeed = 3f;
@@ -20,24 +20,38 @@ public class EnemyAStarAI : MonoBehaviour
     public float viewDistance = 50f;
     public bool drawFOV = true;
 
+
+    public float patrolRadius = 5f;     
+    public float patrolWaitTime = 2f;    
+    private float patrolTimer = 0f;
+    private bool isPatrolling = false;
+    private Vector3 patrolTarget;
+   
+
     List<Node> path;
     int index;
     float timer;
-
-    // for animation speed detection
     private float currentSpeed = 0f;
+
+
+    void Start()
+    {
+     
+        LocalGrid.Instance.GenerateGrid(transform.position);
+        SetNewPatrolPoint();
+    }
+
 
     void Update()
     {
         float dist = Vector3.Distance(transform.position, player.position);
         bool isChasing = false;
 
-        // ---------------------------
-        // AGGRO + FOV
-        // ---------------------------
+   
         if (dist <= aggroRadius && IsPlayerInFOV())
         {
             isChasing = true;
+            isPatrolling = false;
 
             timer -= Time.deltaTime;
             if (timer <= 0f)
@@ -54,16 +68,14 @@ public class EnemyAStarAI : MonoBehaviour
         }
         else
         {
-            // STOP MOVING WHEN PLAYER IS LOST
-            currentSpeed = 0f;
+
+            PatrolBehaviour();
         }
 
-        // ---------------------------
-        // ANIMATION FIX
-        // ---------------------------
+    
         if (animator != null)
         {
-            bool jogging = isChasing && canMove && currentSpeed > 0.1f;
+            bool jogging = (isChasing || isPatrolling) && canMove && currentSpeed > 0.1f;
 
             animator.SetBool("isJogging", jogging);
             animator.SetFloat("speed", currentSpeed);
@@ -71,7 +83,53 @@ public class EnemyAStarAI : MonoBehaviour
     }
 
 
-    // --------- FOV (unchanged completely) ----------
+    void PatrolBehaviour()
+    {
+        patrolTimer -= Time.deltaTime;
+
+       
+        if (path == null || index >= path.Count)
+        {
+            if (patrolTimer <= 0f)
+            {
+                SetNewPatrolPoint();
+            }
+
+            currentSpeed = 0f;
+            return;
+        }
+
+    
+        isPatrolling = true;
+        if (canMove)
+            FollowPath();
+    }
+
+  
+    // PATROL 
+ 
+    void SetNewPatrolPoint()
+    {
+        patrolTimer = patrolWaitTime;
+
+  
+        Vector2 random = Random.insideUnitCircle.normalized * patrolRadius;
+        patrolTarget = new Vector3(
+            transform.position.x + random.x,
+            transform.position.y,
+            transform.position.z + random.y
+        );
+
+      
+        LocalGrid.Instance.GenerateGrid(transform.position);
+
+        path = FindPath(transform.position, patrolTarget);
+        index = 0;
+
+        isPatrolling = true;
+    }
+
+
     bool IsPlayerInFOV()
     {
         if (player == null) return false;
@@ -89,13 +147,11 @@ public class EnemyAStarAI : MonoBehaviour
         return angle <= half;
     }
 
-    // --------- FOLLOW PATH (unchanged except speed calc for anim) ----------
     void FollowPath()
     {
         if (path == null || index >= path.Count) return;
 
         Vector3 target = path[index].worldPos;
-
         Vector3 prev = transform.position;
 
         transform.position = Vector3.MoveTowards(
@@ -106,16 +162,12 @@ public class EnemyAStarAI : MonoBehaviour
 
         transform.LookAt(new Vector3(target.x, transform.position.y, target.z));
 
-        // calculate simple speed for animator
         currentSpeed = (transform.position - prev).magnitude / Mathf.Max(Time.deltaTime, 1e-6f);
 
         if (Vector3.Distance(transform.position, target) < 0.4f)
             index++;
     }
 
-    // ============================================================
-    // The A* code below is identical to your original implementation
-    // ============================================================
     List<Node> FindPath(Vector3 startPos, Vector3 endPos)
     {
         Node start = LocalGrid.Instance.NodeFromWorldPoint(startPos);
@@ -188,12 +240,8 @@ public class EnemyAStarAI : MonoBehaviour
         return 14 * Mathf.Min(dx, dy) + 10 * Mathf.Abs(dx - dy);
     }
 
-    // ============================================================
-    // DRAW: A* path + Aggro radius + FOV cone (unchanged)
-    // ============================================================
     void OnDrawGizmos()
     {
-        // Draw A* path
         if (path != null)
         {
             Gizmos.color = Color.cyan;
@@ -201,13 +249,11 @@ public class EnemyAStarAI : MonoBehaviour
                 Gizmos.DrawLine(path[i].worldPos, path[i + 1].worldPos);
         }
 
-        // Draw Aggro radius
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, aggroRadius);
 
         if (!drawFOV) return;
 
-        // Draw FOV cone
         Vector3 origin = transform.position;
         float half = viewAngle / 2f;
 
@@ -218,7 +264,6 @@ public class EnemyAStarAI : MonoBehaviour
         Gizmos.DrawLine(origin, origin + leftDir.normalized * viewDistance);
         Gizmos.DrawLine(origin, origin + rightDir.normalized * viewDistance);
 
-        // Cone fill
         int steps = 20;
         float stepAngle = viewAngle / steps;
 

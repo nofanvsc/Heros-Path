@@ -11,8 +11,8 @@ public class PlayerCombat : MonoBehaviour
     public Slider healthSlider;
 
     [Header("Weapon Hit Detection (Box Hitbox)")]
-    public Transform attackPoint;          // Position/rotation of hitbox
-    public Vector3 hitBoxSize = new Vector3(1f, 1f, 1f);   // Editable size
+    public Transform attackPoint;          
+    public Vector3 hitBoxSize = new Vector3(1f, 1f, 1f);   
     public LayerMask enemyLayer;
 
     public int lightDamage = 30;
@@ -21,7 +21,7 @@ public class PlayerCombat : MonoBehaviour
     private bool lightActive = false;
     private bool heavyActive = false;
 
-    // --- Death System ---
+ 
     public bool isDead = false;
     public PlayerController controller;
 
@@ -31,12 +31,10 @@ public class PlayerCombat : MonoBehaviour
         UpdateHealthUI();
     }
 
-    // ----------------------------------------------------------
-    // PLAYER TAKES DAMAGE
-    // ----------------------------------------------------------
+
     public void TakeDamage(int dmg)
     {
-        if (isDead) return; // prevent more damage after death
+        if (isDead) return; 
 
         currentHealth -= dmg;
         if (currentHealth < 0) currentHealth = 0;
@@ -46,7 +44,7 @@ public class PlayerCombat : MonoBehaviour
         if (currentHealth <= 0)
         {
             isDead = true;
-            controller.OnPlayerDeath();   // tell controller to handle death
+            controller.OnPlayerDeath();   
             Debug.Log("Player Dead");
         }
     }
@@ -60,9 +58,6 @@ public class PlayerCombat : MonoBehaviour
         }
     }
 
-    // ----------------------------------------------------------
-    // ANIMATION EVENTS
-    // ----------------------------------------------------------
     public void EnableLightAttack()
     {
         lightActive = true;
@@ -85,9 +80,7 @@ public class PlayerCombat : MonoBehaviour
         heavyActive = false;
     }
 
-    // ----------------------------------------------------------
-    // BOX HIT DETECTION
-    // ----------------------------------------------------------
+
     private void PerformAttack()
     {
         Collider[] hits = Physics.OverlapBox(

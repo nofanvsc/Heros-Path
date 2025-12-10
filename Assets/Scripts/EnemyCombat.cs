@@ -16,8 +16,8 @@ public class EnemyCombat : MonoBehaviour
     [Header("References")]
     public Animator animator;
     public EnemyAStarAI ai;
-    public Transform attackPoint;        // SwordGoblin -> AttackPoint (child)
-    public float hitboxRadius = 0.6f;    // matches player style
+    public Transform attackPoint;       
+    public float hitboxRadius = 0.6f;    
     public LayerMask playerLayer;
 
     private Transform player;
@@ -45,7 +45,7 @@ public class EnemyCombat : MonoBehaviour
             Debug.LogWarning("EnemyCombat: No GameObject with tag 'Player' found in scene.");
         }
 
-        // safety: if ai or animator not assigned, try to get from this object
+
         if (ai == null) ai = GetComponent<EnemyAStarAI>();
         if (animator == null) animator = GetComponent<Animator>();
     }
@@ -55,9 +55,7 @@ public class EnemyCombat : MonoBehaviour
         TryAttack();
     }
 
-    // ----------------------------------------------------------
-    // ATTACK ATTEMPT
-    // ----------------------------------------------------------
+ 
     void TryAttack()
     {
         if (isAttacking) return;
@@ -79,17 +77,13 @@ public class EnemyCombat : MonoBehaviour
         }
     }
 
-    // ----------------------------------------------------------
-    // ANIMATION EVENT: EnableAttack (put this event at impact frame)
-    // ----------------------------------------------------------
+
     public void EnableAttack()
     {
         hitboxActive = true;
     }
 
-    // ----------------------------------------------------------
-    // ANIMATION EVENT: DisableAttack (put this event at end of attack)
-    // ----------------------------------------------------------
+
     public void DisableAttack()
     {
         hitboxActive = false;
@@ -118,15 +112,13 @@ public class EnemyCombat : MonoBehaviour
                 if (pc != null) pc.TakeDamage(damage);
             }
 
-            // only apply once per attack
+         
             hitboxActive = false;
             break;
         }
     }
 
-    // ----------------------------------------------------------
-    // DAMAGE + UI
-    // ----------------------------------------------------------
+
     public void TakeDamage(int dmg)
     {
         currentHealth -= dmg;
@@ -146,9 +138,7 @@ public class EnemyCombat : MonoBehaviour
         Destroy(gameObject);
     }
 
-    // ----------------------------------------------------------
-    // DEBUG DRAW (optional)
-    // ----------------------------------------------------------
+ 
     void OnDrawGizmosSelected()
     {
         if (attackPoint)

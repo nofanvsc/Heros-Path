@@ -30,7 +30,7 @@ public class ThirdPersonCamera : MonoBehaviour
     {
         if (!player) return;
 
-        // ----- MOUSE LOOK -----
+
         float mouseX = Input.GetAxis("Mouse X") * sensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * sensitivity;
 
@@ -40,12 +40,12 @@ public class ThirdPersonCamera : MonoBehaviour
 
         Quaternion rotation = Quaternion.Euler(pitch, yaw, 0);
 
-        // ----- CAMERA POSITION -----
+     
         Vector3 desiredPos = player.position + rotation * offset;
 
         transform.position = Vector3.Lerp(transform.position, desiredPos, smoothSpeed * Time.deltaTime);
 
-        // ----- CAMERA ROTATION -----
+  
         transform.rotation = rotation;
     }
 }

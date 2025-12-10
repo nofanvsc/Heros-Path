@@ -36,7 +36,7 @@ public class PlayerController : MonoBehaviour
     private bool isRunning = false;
     private bool hasWeapon = false;
 
-    // --- Death System ---
+  
     private bool isDead = false;
 
     private void Start()
@@ -50,9 +50,7 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        // ------------------------------------------------
-        // STOP EVERYTHING IF DEAD
-        // ------------------------------------------------
+    
         if (isDead)
         {
             controller.Move(Vector3.zero);
@@ -191,9 +189,7 @@ public class PlayerController : MonoBehaviour
             animator.SetTrigger("DieTrigger");
     }
 
-    // ----------------------------------------------------------
-    // PLAYER DEATH HANDLER
-    // ----------------------------------------------------------
+
     public void OnPlayerDeath()
     {
         isDead = true;

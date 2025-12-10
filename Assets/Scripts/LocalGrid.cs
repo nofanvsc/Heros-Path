@@ -24,9 +24,7 @@ public class LocalGrid : MonoBehaviour
         terrain = Terrain.activeTerrain;
     }
 
-    // ============================================================
-    // Generate grid dynamically
-    // ============================================================
+
     public void GenerateGrid(Vector3 worldCenter)
     {
         center = worldCenter;
@@ -65,7 +63,7 @@ public class LocalGrid : MonoBehaviour
         }
     }
 
-    // ============================================================
+
     public Node NodeFromWorldPoint(Vector3 worldPos)
     {
         float half = (gridSize / 2f) * nodeDiameter;
@@ -82,7 +80,7 @@ public class LocalGrid : MonoBehaviour
         return grid[x, y];
     }
 
-    // ============================================================
+   
     public List<Node> GetNeighbours(Node node)
     {
         List<Node> list = new List<Node>();
@@ -106,7 +104,7 @@ public class LocalGrid : MonoBehaviour
         return list;
     }
 
-    // ============================================================
+ 
     void OnDrawGizmos()
     {
         if (grid == null) return;
